@@ -2,8 +2,11 @@ package auth
 
 import (
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 // GetSession retrieves the session data from a file named ".aoc-session" located in the user's home directory.
@@ -31,6 +34,27 @@ func SaveSession(session string) error {
 	if err != nil {
 		return fmt.Errorf("unable to write session file: %w", err)
 	}
+	return nil
+}
+
+// ValidateSession verifies the validity of the given session token for the specified year's Advent of Code events.
+// It sends a GET request to the Advent of Code website using the session token and checks the HTTP response status.
+// An error is returned if the session is invalid or if an issue occurs during the request process.
+func ValidateSession(session string, year int) error {
+	client := http.Client{Timeout: 10 * time.Second}
+	url := fmt.Sprintf("https://adventofcode.com/%d/about", year)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Add("Cookie", fmt.Sprintf("session=%s", session))
+	resp, err := client.Do(req)
+	if err != nil || resp.StatusCode != http.StatusOK {
+		return err
+	}
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(resp.Body)
 	return nil
 }
 

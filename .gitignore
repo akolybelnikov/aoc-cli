@@ -1,0 +1,48 @@
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Go workspace files
+*.out
+
+# Dependency directories (vendor/)
+vendor/
+
+# Output of the 'go test' command
+*.test
+*.prof
+coverage.txt
+
+# IDE specific (GoLand, VSCode, etc.)
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Log files
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.old
+*.orig
+*.rej
+*.sublime-workspace
+
+# Built executables
+/dist/
+/build/
+/bin/
+/*.o
+
+# Modules cache
+# If you want to keep module cache updated, consider excluding it.
+mod/
+pkg/

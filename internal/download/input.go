@@ -10,8 +10,14 @@ import (
 
 func Input(year, day int, session string) error {
 	url := fmt.Sprintf("https://adventofcode.com/%d/day/%d/input", year, day)
-	destPath := filepath.Join("inputs", fmt.Sprintf("day%02d.txt", day))
-
+	// Get the current working directory
+	cwd, err := os.Getwd()
+	fmt.Println(cwd)
+	if err != nil {
+		return err
+	}
+	destPath := filepath.Join(cwd, "inputs", fmt.Sprintf("day%02d.txt", day))
+	fmt.Println(destPath)
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("Cookie", "session="+session)

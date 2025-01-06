@@ -12,7 +12,7 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "aoc",
+	Use:   "aoc-cli",
 	Short: "Bootstrapping and session management for Advent of Code",
 	Long: `
 Aoc-cli is a CLI tool for bootstrapping daily challenges for Advent of Code.

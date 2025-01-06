@@ -14,10 +14,30 @@ You can install the CLI directly using Go without cloning the repository.
 go install github.com/akolybelnikov/aoc-cli@latest
 ```
 
+## Bootstrap a day's solution and download your puzzle inputs
+
+The `bootstrap` command helps you quickly set up your solution for a specific day and download the corresponding puzzle 
+inputs. It creates a new solution directory for the given day and populates it with the necessary boilerplate code.
+
+### Example
+To initialize a solution for Day 5, run:
+
+```shell
+aoc-cli bootstrap --day 5 --path /projects/my-project
+```
+
+- A solution file pre-filled with boilerplate code.
+- A test file for `day05`.
+- Placeholder values replaced dynamically (e.g., day number).
+
+If valid session credentials are already configured, the input file for Day 5 will also be downloaded into the project 
+directory automatically.
+
 ## Auth - Session Management
 
 ### Why Session Management?
-Advent of Code (AoC) puzzles and inputs require authentication. AoC uses a session cookie (`session` token) to verify users. This CLI stores the session locally, allowing automated puzzle downloads without repeated logins.
+Advent of Code (AoC) puzzles and inputs require authentication. AoC uses a session cookie (`session` token) to verify users. 
+This CLI stores the session locally, allowing automated puzzle downloads without repeated logins.
 
 ### How It Works:
 1. **First Run (No Session Found):**

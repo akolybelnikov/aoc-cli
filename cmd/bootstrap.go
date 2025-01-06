@@ -6,9 +6,10 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/akolybelnikov/aoc-cli/internal"
 	"github.com/akolybelnikov/aoc-cli/internal/auth"
 	"github.com/akolybelnikov/aoc-cli/internal/download"
-	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -55,8 +56,7 @@ Downloaded input will be stored in the /inputs directory.`,
 		}
 
 		dayFolder := filepath.Join(downloadPath, "cmd", fmt.Sprintf("day%02d", day))
-		templatePath := "internal/templates/"
-		err = copyTemplate(templatePath, dayFolder)
+		err = copyTemplate(dayFolder)
 		if err != nil {
 			fmt.Printf("Failed to copy template: %v\n", err)
 			return
@@ -93,40 +93,27 @@ func init() {
 }
 
 // copyTemplate copies files from templatePath to targetPath
-func copyTemplate(templatePath, targetPath string) error {
+func copyTemplate(targetPath string) error {
 	dayStr := fmt.Sprintf("%02d", day)
 
-	return filepath.Walk(templatePath, func(path string, info os.FileInfo, err error) error {
+	return fs.WalkDir(internal.Templates, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
-		relPath, _ := filepath.Rel(templatePath, path)
-		destPath := filepath.Join(targetPath, relPath)
-
-		// Handle file renaming
-		if strings.HasSuffix(info.Name(), ".go") {
-			if info.Name() == "solution.go" {
-				destPath = filepath.Join(targetPath, fmt.Sprintf("day%s.go", dayStr))
-			} else if info.Name() == "test.go" {
-				destPath = filepath.Join(targetPath, fmt.Sprintf("day%s_test.go", dayStr))
-			}
+		// Skip the root "templates" directory itself
+		if path == "templates" {
+			return nil
 		}
 
-		if info.IsDir() {
-			return os.MkdirAll(destPath, os.ModePerm)
+		if d.IsDir() {
+			// Mirror the directory structure
+			destDir := filepath.Join(targetPath, path)
+			return os.MkdirAll(destDir, os.ModePerm)
 		}
 
-		// Read source file
-		srcFile, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer func(srcFile *os.File) {
-			_ = srcFile.Close()
-		}(srcFile)
-
-		content, err := io.ReadAll(srcFile)
+		// Read file content from embedded template
+		content, err := internal.Templates.ReadFile(path)
 		if err != nil {
 			return err
 		}
@@ -135,21 +122,18 @@ func copyTemplate(templatePath, targetPath string) error {
 		updatedContent := strings.ReplaceAll(string(content), "{{DAY}}", dayStr)
 		updatedContent = strings.ReplaceAll(updatedContent, "package templates", fmt.Sprintf("package main"))
 
-		// If it's the test file, replace TestSolution with TestDayXX
-		if strings.Contains(info.Name(), "test.go") {
-			updatedContent = strings.ReplaceAll(updatedContent, "TestSolution", fmt.Sprintf("TestDay%s", dayStr))
+		// Handle file renaming logic
+		fileName := filepath.Base(path)
+		if strings.HasSuffix(fileName, "solution.go") {
+			fileName = fmt.Sprintf("day%s.go", dayStr)
+		} else if strings.HasSuffix(fileName, "test.go") {
+			fileName = fmt.Sprintf("day%s_test.go", dayStr)
 		}
 
-		// Write to the new destination
-		destFile, err := os.Create(destPath)
-		if err != nil {
-			return err
-		}
-		defer func(destFile *os.File) {
-			_ = destFile.Close()
-		}(destFile)
+		// Determine destination path
+		destPath := filepath.Join(targetPath, fileName)
 
-		_, err = destFile.Write([]byte(updatedContent))
-		return err
+		// Write the updated content to the destination file
+		return os.WriteFile(destPath, []byte(updatedContent), os.ModePerm)
 	})
 }

@@ -1,4 +1,4 @@
-module github/akolybelnikov/aoc-cli
+module github.com/akolybelnikov/aoc-cli
 
 go 1.23
 

@@ -46,3 +46,5 @@ Thumbs.db
 # If you want to keep module cache updated, consider excluding it.
 mod/
 pkg/
+
+inputs/

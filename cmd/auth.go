@@ -7,7 +7,7 @@ package cmd
 import (
 	"bufio"
 	"fmt"
-	"github/akolybelnikov/aoc-cli/internal/auth"
+	"github.com/akolybelnikov/aoc-cli/internal/auth"
 	"os"
 	"strings"
 	"time"

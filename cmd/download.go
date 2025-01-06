@@ -6,8 +6,8 @@ package cmd
 
 import (
 	"fmt"
-	"github/akolybelnikov/aoc-cli/internal/auth"
-	"github/akolybelnikov/aoc-cli/internal/download"
+	"github.com/akolybelnikov/aoc-cli/internal/auth"
+	"github.com/akolybelnikov/aoc-cli/internal/download"
 	"os"
 	"time"
 

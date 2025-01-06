@@ -11,7 +11,7 @@ You can install the CLI directly using Go without cloning the repository.
 
 ### Install via Go
 ```bash
-go install github.com/yourusername/aoc-cli@latest
+go install github.com/akolybelnikov/aoc-cli@latest
 ```
 
 ## Auth - Session Management

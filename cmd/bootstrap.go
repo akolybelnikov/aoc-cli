@@ -35,8 +35,15 @@ It will also create a new directory for the day in the /cmd directory and add a 
 			return
 		}
 
-		dayFolder := fmt.Sprintf("cmd/day%02d", day)
-		err := os.MkdirAll(dayFolder, os.ModePerm)
+		// Get the current working directory
+		cwd, err := os.Getwd()
+		if err != nil {
+			fmt.Printf("Failed to get working directory: %v\n", err)
+			return
+		}
+
+		dayFolder := fmt.Sprintf("%s/cmd/day%02d", cwd, day)
+		err = os.MkdirAll(dayFolder, os.ModePerm)
 		if err != nil {
 			fmt.Printf("Failed to create directory: %v\n", err)
 			return

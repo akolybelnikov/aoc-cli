@@ -6,6 +6,8 @@ package cmd
 
 import (
 	"fmt"
+	"github/akolybelnikov/aoc-cli/internal/auth"
+	"github/akolybelnikov/aoc-cli/internal/download"
 	"io"
 	"os"
 	"path/filepath"
@@ -22,6 +24,9 @@ var bootstrapCmd = &cobra.Command{
 	Long: `Bootstrap a solution for a specific day. Downloaded input will be stored in the /inputs directory.
 It will also create a new directory for the day in the /cmd directory and add a test file for the solution.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if downloadYear == 0 {
+			downloadYear = time.Now().Year()
+		}
 		if day == 0 {
 			day = time.Now().Day()
 		}
@@ -43,12 +48,32 @@ It will also create a new directory for the day in the /cmd directory and add a 
 			fmt.Printf("Failed to copy template: %v\n", err)
 			return
 		}
+		fmt.Printf("Solution for Day %02d created successfully!\n", day)
 
+		session, err := auth.GetSession()
+		if err != nil {
+			fmt.Println("Invalid or expired session. Please run auth to update your session.")
+			return
+		}
+
+		err = auth.ValidateSession(session, downloadYear)
+		if err != nil {
+			fmt.Println("Invalid session. Please run auth to update your session.")
+		}
+
+		err = download.Input(downloadYear, day, session)
+		if err != nil {
+			fmt.Printf("Failed to download the input: %v\n", err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("Input for Day %02d downloaded successfully!\n", day)
 	},
 }
 
 func init() {
 	bootstrapCmd.Flags().IntVarP(&day, "day", "d", 0, "Day of Advent of Code (1-25)")
+	bootstrapCmd.Flags().IntVarP(&downloadYear, "year", "y", 0, "Advent of Code year (default: current year)")
 	rootCmd.AddCommand(bootstrapCmd)
 }
 
@@ -94,6 +119,11 @@ func copyTemplate(templatePath, targetPath string) error {
 		// Replace placeholders
 		updatedContent := strings.ReplaceAll(string(content), "{{DAY}}", dayStr)
 		updatedContent = strings.ReplaceAll(updatedContent, "package templates", fmt.Sprintf("package main"))
+
+		// If it's the test file, replace TestSolution with TestDayXX
+		if strings.Contains(info.Name(), "test.go") {
+			updatedContent = strings.ReplaceAll(updatedContent, "TestSolution", fmt.Sprintf("TestDay%s", dayStr))
+		}
 
 		// Write to the new destination
 		destFile, err := os.Create(destPath)

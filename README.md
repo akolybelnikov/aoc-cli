@@ -1,3 +1,19 @@
+# Advent of Code CLI
+
+A CLI tool to automate downloading inputs for Advent of Code, written in Go.
+
+## Installation
+
+You can install the CLI directly using Go without cloning the repository.
+
+### Requirements
+- Go 1.19+ installed
+
+### Install via Go
+```bash
+go install github.com/yourusername/aoc-cli@latest
+```
+
 ## Auth - Session Management
 
 ### Why Session Management?

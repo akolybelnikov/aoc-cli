@@ -22,13 +22,16 @@ var downloadCmd = &cobra.Command{
 	Use:   "download",
 	Short: "Download Advent of Code input for a specific day",
 	Long: `
-Download Advent of Code input for a specific day. The year defaults to the current year.
+Download Advent of Code input for a specific day. The year defaults to the current year, and the day defaults to the current day.
 Pass the --year flag to specify a different year, and the --day flag to specify a specific day.
 Example: aoc download --day 1 --year 2025
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		if downloadYear == 0 {
 			downloadYear = time.Now().Year()
+		}
+		if day == 0 {
+			day = time.Now().Day()
 		}
 		if day < 1 || day > 25 {
 			fmt.Println("Invalid day. Please choose a day between 1 and 25.")

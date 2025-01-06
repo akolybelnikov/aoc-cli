@@ -22,9 +22,10 @@ var downloadCmd = &cobra.Command{
 	Use:   "download",
 	Short: "Download Advent of Code input for a specific day",
 	Long: `
-Download Advent of Code input for a specific day. The year defaults to the current year, and the day defaults to the current day.
+Download the input for a specific day. requires a valid session and a path to the project root.
+The year defaults to the current year, and the day defaults to the current day.
 Pass the --year flag to specify a different year, and the --day flag to specify a specific day.
-Example: aoc download --day 1 --year 2025
+Example: aoc download --day 1 --year 2025 --path "/path/to/project"
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		if downloadYear == 0 {
@@ -35,6 +36,11 @@ Example: aoc download --day 1 --year 2025
 		}
 		if day < 1 || day > 25 {
 			fmt.Println("Invalid day. Please choose a day between 1 and 25.")
+			return
+		}
+
+		if downloadPath == "" {
+			fmt.Printf("Please provide a path to the project root.\n")
 			return
 		}
 
@@ -51,7 +57,7 @@ Example: aoc download --day 1 --year 2025
 			fmt.Println("Invalid session. Please run auth to update your session.")
 		}
 
-		err = download.Input(downloadYear, day, session)
+		err = download.Input(downloadYear, day, session, downloadPath)
 		if err != nil {
 			fmt.Printf("Failed to download the input: %v\n", err)
 			os.Exit(1)
@@ -62,6 +68,7 @@ Example: aoc download --day 1 --year 2025
 }
 
 func init() {
+	downloadCmd.Flags().StringVarP(&downloadPath, "path", "p", "", "Custom path for downloading files")
 	downloadCmd.Flags().IntVarP(&day, "day", "d", 0, "Day of Advent of Code (1-25)")
 	downloadCmd.Flags().IntVarP(&downloadYear, "year", "y", 0, "Advent of Code year (default: current year)")
 	rootCmd.AddCommand(downloadCmd)

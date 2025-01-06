@@ -17,12 +17,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var downloadPath string
+
 // bootstrapCmd represents the bootstrap command
 var bootstrapCmd = &cobra.Command{
 	Use:   "bootstrap",
 	Short: "Bootstrap a solution for a specific day",
-	Long: `Bootstrap a solution for a specific day. Downloaded input will be stored in the /inputs directory.
-It will also create a new directory for the day in the /cmd directory and add a test file for the solution.`,
+	Long: `Bootstrap a solution for a specific day. Requires a valid session and a path to the project root.
+Downloaded input will be stored in the /inputs directory.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if downloadYear == 0 {
 			downloadYear = time.Now().Year()
@@ -35,29 +37,32 @@ It will also create a new directory for the day in the /cmd directory and add a 
 			return
 		}
 
-		// Get the current working directory
-		cwd, err := os.Getwd()
-		fmt.Println(cwd)
+		if downloadPath == "" {
+			fmt.Printf("Please provide a path to the project root.\n")
+			return
+		}
+		cmdPath := filepath.Join(downloadPath, "cmd")
+
+		err := os.MkdirAll(cmdPath, os.ModePerm)
+		if err != nil {
+			fmt.Printf("Failed to create directory at %s: %v\n", downloadPath, err)
+			return
+		}
+
 		if err != nil {
 			fmt.Printf("Failed to get working directory: %v\n", err)
 			return
 		}
 
-		dayFolder := fmt.Sprintf("%s/cmd/day%02d", cwd, day)
-		fmt.Println(dayFolder)
-		err = os.MkdirAll(dayFolder, os.ModePerm)
-		if err != nil {
-			fmt.Printf("Failed to create directory: %v\n", err)
-			return
-		}
-
+		dayFolder := filepath.Join(downloadPath, "cmd", fmt.Sprintf("day%02d", day))
 		templatePath := "internal/templates/"
 		err = copyTemplate(templatePath, dayFolder)
 		if err != nil {
 			fmt.Printf("Failed to copy template: %v\n", err)
 			return
 		}
-		fmt.Printf("Solution for Day %02d created successfully!\n", day)
+
+		fmt.Printf("Package for Day %02d created successfully!\n", day)
 
 		session, err := auth.GetSession()
 		if err != nil {
@@ -70,7 +75,7 @@ It will also create a new directory for the day in the /cmd directory and add a 
 			fmt.Println("Invalid session. Please run auth to update your session.")
 		}
 
-		err = download.Input(downloadYear, day, session)
+		err = download.Input(downloadYear, day, session, downloadPath)
 		if err != nil {
 			fmt.Printf("Failed to download the input: %v\n", err)
 			os.Exit(1)
@@ -83,6 +88,7 @@ It will also create a new directory for the day in the /cmd directory and add a 
 func init() {
 	bootstrapCmd.Flags().IntVarP(&day, "day", "d", 0, "Day of Advent of Code (1-25)")
 	bootstrapCmd.Flags().IntVarP(&downloadYear, "year", "y", 0, "Advent of Code year (default: current year)")
+	bootstrapCmd.Flags().StringVarP(&downloadPath, "path", "p", "", "Custom path for downloading files")
 	rootCmd.AddCommand(bootstrapCmd)
 }
 
